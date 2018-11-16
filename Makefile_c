@@ -1,0 +1,60 @@
+TOP_DIR:= $(PWD)
+DEVICE ?= bl606
+TARGET_OUT_PATH:= out
+CPU_ID ?=np
+BOOTROM ?=n
+BL_LDSCRIPT:= CMSIS/Device/Bouffalo/$(DEVICE)/Startup/GCC/bl606_ram.ld
+
+.PHONY: all clean dvtest fpgatest chiptest
+#all: dvtest fpgatest chiptest
+all: dvtest
+
+clean:
+	@rm -rf $(TARGET_OUT_PATH)
+
+objclean:
+	@find $(TARGET_OUT_PATH) -name *.o  | xargs rm -f
+	
+include Build/config.mk
+include Build/toolchain.mk
+include Build/def.mk
+
+MODULE_DIR:=./
+base_objects:=
+include $(wildcard CMSIS/Device/Bouffalo/$(DEVICE)/Startup/*.mk)
+include StdDriver/StdDriver.mk
+include Common/Common.mk
+#include MACDriver/MACDriver.mk
+all_objects := $(base_objects)
+
+#ChipTest.mk
+include ChipTest/ChipTest.mk
+
+#DVTest.mk
+DV_DEP_TOOLS:=
+include Build/Tools/DVBinConv/DVBinConv.mk
+ifeq ($(BOOTROM),n)
+
+ifeq ($(TEST_MODULE),)
+include DVTest/DVTest.mk
+else
+include DVTest/$(TEST_MODULE)/$(TEST_MODULE).mk
+endif
+
+else
+include DVTest/SIM_Test/BootRom.mk
+endif
+#FPGATest.mk
+include FPGATest/FPGATest.mk
+
+#all_objects += include $(wildcard $(TARGET)/*.mk)
+
+#$(info makefile $(all_objects))
+chiptest: $(CHIPTEST_TARGETS)
+	@echo "chipset testbench: $(CHIPTEST_TARGETS)"
+
+fpgatest: $(FPGATEST_TARGETS)
+	@echo "fpga testbench: $(FPGATEST_TARGETS)"
+
+dvtest: $(DV_DEP_TOOLS) $(DVTEST_TARGETS)
+	@echo "dv testbench: $(DVTEST_TARGETS)"
