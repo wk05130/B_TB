@@ -1,0 +1,223 @@
+`ifndef CHROMA_BASE_TEST
+`define CHROMA_BASE_TEST
+`include "chroma_common_def.svh"
+class chroma_base_test extends soc_base_test;
+    `uvm_component_utils(chroma_base_test)
+    virtual top_chip_if i_top_chip_if;
+    local isp_chroma_param_t  isp_chroma_param_o;
+    bit             bin_from_raw_en;
+    rand bit[31:0]  grey_th;
+    rand bit[31:0]  gain;
+    rand bit[31:0]  weight;
+    rand bit[31:0]  r_scal_factor;
+    rand bit[31:0]  b_scal_factor;
+    rand bit[31:0]  nr_profile[6][2];    //12,17 bit, cpu can access
+    rand bit[31:0]  luma_w[2][32];       //9  bit, cpu can access
+    rand bit[31:0]  gcore_w;
+    rand bit[31:0]  rbcore_w;
+    rand bit[31:0]  m_g_img_w;
+    rand bit[31:0]  m_g_img_h;
+    rand bit[31:0]  pattern;   
+    chroma_func_cov   fun_cov;    
+    int i; 
+    int fp_raw;
+    int fp;
+    int num_pix;
+    int num_frame;
+    string SRC_IN_FROM_RAW_PATH;   
+    string SRC_YIN_PATH;
+    string SRC_UIN_PATH;
+    string SRC_VIN_PATH;   
+    string DST_PATH;
+
+
+    bit[7:0]  date_tmp_y[0:1920*1080-1];
+    bit[7:0]  date_tmp_u[0:1920*1080/2-1];
+    bit[7:0]  date_tmp_v[0:1920*1080/2-1];
+    bit[31:0] src_file_from_yuv_en;
+    function new(string name = "chroma_base_test", uvm_component parent = null );
+        super.new(name, parent);
+        fun_cov = new();
+    endfunction
+
+    virtual function void build_phase(uvm_phase phase);
+        super.build_phase(phase);
+    endfunction
+    virtual task reset_phase(uvm_phase phase);
+        phase.raise_objection(this);
+        super.reset_phase(phase);
+        std::randomize(m_g_img_w,m_g_img_h)with{
+                                   //{m_g_img_w,m_g_img_h} inside {{160,120},{640,480}}; //inside {{160,120},{1280,720},{1920,1080},{640,480}};
+                                   {m_g_img_w,m_g_img_h} inside {{160,120},{1280,720},{1920,1080},{640,480}}; 
+                                   //{m_g_img_w,m_g_img_h} inside {{160,120}}; 
+                                           };
+        
+        chroma_img_w    = m_g_img_w;
+        chroma_img_h    = m_g_img_h;       
+        src_file_from_yuv_en = 0;
+        DST_PATH      ="dst.yuv";
+        SRC_YIN_PATH   ="src_y_in_ascii.txt";
+        SRC_UIN_PATH   ="src_u_in_ascii.txt";
+        SRC_VIN_PATH   ="src_v_in_ascii.txt";
+        SRC_IN_FROM_RAW_PATH = "../src_in.yuv";;   
+        uvm_hdl_force("top_soc_tb.i_top_chip_if.chroma_if.RX_FLAG",1'b0);
+        uvm_hdl_force("top_soc_tb.i_top_chip_if.chroma_if.TX_FLAG",1'b0);
+        phase.drop_objection(this);
+    endtask
+    virtual task main_phase(uvm_phase phase);
+        phase.raise_objection(this);
+        super.main_phase(phase);
+        repeat(8)
+        begin
+            wait(~top_soc_tb.i_top_chip_if.chroma_if.RX_FLAG); 
+            $display("*********************************************************************");
+            $display("[SBNR]TEST NUM_FRAME %d START(chroma_img_w: %d;chroma_img_h:%d)",num_frame,chroma_img_w,chroma_img_h);
+            $display("*********************************************************************");
+            num_frame++; 
+            if(src_file_from_yuv_en==1)
+            begin
+                fp=$fopen(SRC_IN_FROM_RAW_PATH,"rb");
+                $display("[chroma_test_case %t]read_src_path: %s;buf[0]:%h,buf[1]:%h,buf[2]:%h,buf[3]:%h",$time,SRC_IN_FROM_RAW_PATH,chroma_data_in_buf[0],chroma_data_in_buf[1],chroma_data_in_buf[2],chroma_data_in_buf[3]);
+                if(fp == 0) $display("[chroma]err fp or buf");                                                                                             
+                num_pix = 2*chroma_img_w*chroma_img_h;
+                $display("[chroma_test_case %t]chroma_img_w: %d; chroma_img_h:%d; num_pix: %d",$time,chroma_img_w,chroma_img_h,num_pix);
+                $fread(chroma_data_in_buf,fp,,num_pix);
+                $fclose(fp);
+                $display("[chroma_test_case %t]read_raw_path: %s;buf[0]:%h,buf[1]:%h,buf[2]:%h,buf[3]:%h",$time,SRC_IN_FROM_RAW_PATH,chroma_data_in_buf[0],chroma_data_in_buf[1],chroma_data_in_buf[2],chroma_data_in_buf[3]);
+                repeat(num_pix)
+                begin
+                    if(i%2==0)
+                    begin
+                        chroma_y_in_buf[i/2]   = chroma_data_in_buf[i];
+                    end
+                    else
+                    begin
+                        chroma_uv_in_buf[i/2]  = chroma_data_in_buf[i];
+                    end
+                    i++;
+                end
+                i = 0;
+            end
+            else
+            begin
+                //*************************auto random write*******************************************
+                repeat(chroma_img_w*chroma_img_h)
+                begin
+                    date_tmp_y[i] = $urandom_range(0,8'hff);
+                    //date_tmp_y[i] = 16'h0;
+                    //date_tmp_y[i]   = i&8'hff;
+                    if(i%2==0)
+                    begin
+                        date_tmp_u[i/2] = $urandom_range(0,8'hff);
+                        //date_tmp_u[i/2] = i&8'hff;
+                    end
+                    else
+                    begin
+                        date_tmp_v[i/2] = $urandom_range(0,8'hff);
+                        //date_tmp_v[i/2] = i&8'hff;
+                    end
+                    //$display("[SBNR]chroma_img_w: %d;chroma_img_h:%d,date_tmp:%h",chroma_img_w,chroma_img_h,date_tmp[i]);
+                    i++;
+                end    
+                i = 0;
+
+                $writememh(SRC_YIN_PATH,date_tmp_y);  //ASCII code
+                $writememh(SRC_UIN_PATH,date_tmp_u);  //ASCII code
+                $writememh(SRC_VIN_PATH,date_tmp_v);  //ASCII code
+                
+                chroma_y_in_buf = date_tmp_y;
+                repeat(chroma_img_w*chroma_img_h)
+                begin
+                    if(i%2==0)
+                    begin
+                        chroma_uv_in_buf[i] = date_tmp_u[i/2];
+                    end
+                    else
+                    begin
+                        chroma_uv_in_buf[i] = date_tmp_v[i/2];
+                    end
+                    i++;
+                end
+                i = 0;
+
+            end           
+            //*******************************************************************************
+            
+            
+            //************************************************
+            // raw file read and don't del it
+            //************************************************
+            //fp=$fopen(SRC_IN_FROM_RAW_PATH,"rb");
+            //$display("[EEP]read_path: %s;buf[0]:%h,buf[1]:%h",SRC_IN_PATH,chroma_in_buf[0],chroma_in_buf[1]);
+            //if(fp == 0) $display("[EEP]err fp or buf");
+            //$fread(chroma_in_buf,fp,,g_img_w*g_img_h);
+            //$fclose(fp);
+            //$display("[EEP]read_path: %s;buf[0]:%h,buf[1]:%h",SRC_IN_PATH,chroma_in_buf[0],chroma_in_buf[1]);
+            //********************************************************************************
+
+            std::randomize(grey_th)with{grey_th inside{[0:15]};}; 
+            std::randomize(gain)with{gain inside{[0:511]};}; 
+            std::randomize(weight)with{weight inside{[0:16]};}; 
+                  
+            fun_cov.item.pix_width      = chroma_img_w;
+            fun_cov.item.pix_heigth     = chroma_img_h;
+            fun_cov.item.bnr_eb         = 1;
+            fun_cov.covport.sample();
+            
+            isp_chroma_param_o.src_file_from_yuv_en          = src_file_from_yuv_en;
+            isp_chroma_param_o.width                         = chroma_img_w;
+            isp_chroma_param_o.height                        = chroma_img_h;
+            isp_chroma_param_o.grey_th                       = grey_th;
+            isp_chroma_param_o.gain                          = gain;
+            isp_chroma_param_o.weight                        = weight;
+            _chroma_tmain(isp_chroma_param_o);
+            #5us;
+            fp_raw=$fopen(DST_PATH,"rb");
+            $display("[chroma_test_case %t]read_raw_path: %s;buf[0]:%h,buf[1]:%h,buf[2]:%h,buf[3]:%h",$time,DST_PATH,chroma_data_out_buf[0],chroma_data_out_buf[1],chroma_data_out_buf[2],chroma_data_out_buf[3]);
+            if(fp_raw == 0) $display("[chroma]err fp_raw or buf");                                                                                             
+            num_pix = 2*chroma_img_w*chroma_img_h;
+            $display("[chroma_test_case %t]chroma_img_w: %d; chroma_img_h:%d; num_pix: %d",$time,chroma_img_w,chroma_img_h,num_pix);
+            $fread(chroma_data_out_buf,fp_raw,,num_pix);
+            $fclose(fp_raw);
+            //foreach(chroma_data_out_buf[i]) chroma_data_out_buf[i] = { << byte {chroma_data_out_buf[i]}};
+            $display("[chroma_test_case %t]read_raw_path: %s;buf[0]:%h,buf[1]:%h,buf[2]:%h,buf[3]:%h",$time,DST_PATH,chroma_data_out_buf[0],chroma_data_out_buf[1],chroma_data_out_buf[2],chroma_data_out_buf[3]);
+            repeat(num_pix)
+            begin
+                if(i%2==0)
+                begin
+                    chroma_y_out_buf[i/2]   = chroma_data_out_buf[i];
+                end
+                else
+                begin
+                    chroma_uv_out_buf[i/2]  = chroma_data_out_buf[i];
+                end
+                i++;
+            end
+            i = 0;
+            $display("************************c_model_work done********************");
+            #10us;
+            uvm_hdl_force("top_soc_tb.i_top_chip_if.chroma_if.RX_FLAG",1'b1);
+            uvm_hdl_force("top_soc_tb.i_top_chip_if.chroma_if.TX_FLAG",1'b1);
+            $display("************************run RTL********************");
+            $display("T NUM_FRAME %d (chroma_img_w: %d;chroma_img_h:%d)",num_frame,chroma_img_w,chroma_img_h);
+            uvm_hdl_force("top_soc_tb.DUT_WRAPPER.dut_chroma.grey_th",grey_th[3:0]);
+            uvm_hdl_force("top_soc_tb.DUT_WRAPPER.dut_chroma.gain",gain[8:0]);
+            uvm_hdl_force("top_soc_tb.DUT_WRAPPER.dut_chroma.weight",weight[4:0]);
+           
+            wait(`VSYNC_IN_CHROMA);
+            wait(~`VSYNC_IN_CHROMA);
+        end
+        //sw_sim_end_mark_cm4 = 1;
+        //sw_sim_end_mark_e21 = 1;
+        phase.phase_done.set_drain_time(this, 0.5us);
+        phase.drop_objection(this);
+    endtask
+    virtual task post_main_phase(uvm_phase phase);
+        phase.raise_objection(this);
+        super.post_main_phase(phase);
+        $display("[chroma_test_case %t finish]chroma_img_w: %d; chroma_img_h:%d; num_pix: %d",$time,chroma_img_w,chroma_img_h,num_pix);
+        phase.drop_objection(this);
+    endtask
+
+endclass
+`endif
