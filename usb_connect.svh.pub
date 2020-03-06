@@ -1,0 +1,81 @@
+`ifndef USB_CONNECT_SVH
+`define USB_CONNECT_SVH
+ 
+//========================================
+// USB Model
+//========================================
+`define DBG_MSG_EN
+
+reg     [31: 0] rdata;
+
+integer         error_cnt;
+reg     [ 7: 0] txmem[0:2048];
+reg     [ 7: 0] buffer1[0:16384];
+reg     [ 7: 0] buffer0[0:16384];
+integer         buffer1_last;
+reg     [31: 0] wd_cnt;
+reg             setup_pid;
+integer         pack_sz, pack_sz_max;
+
+integer         n;
+reg     [31: 0] data;
+
+wire            usb_core_clk;
+
+
+// Descriptor-related signals
+localparam DCT_SW_CTRL = 1;
+reg             dct_sw_en;
+reg     [ 7: 0] dct_type;
+reg     [ 7: 0] dct_index;
+reg     [15: 0] dct_length;
+integer         dct_i;
+reg     [ 7: 0] dct_device[63:0];
+reg     [ 7: 0] dct_config[63:0];
+reg     [ 7: 0] dct_string_a[63:0];
+reg     [ 7: 0] dct_string_b[63:0];
+reg     [ 7: 0] dct_string_c[63:0];
+reg     [ 7: 0] dct_string_d[63:0];
+
+
+initial  begin
+`ifndef FPGA_T1
+    force `DUT_PATH.usb_rx_dp  = PAD_GPIO[7];
+    force `DUT_PATH.usb_rx_dn  = PAD_GPIO[8];
+    force `DUT_PATH.usb_rx_d   = PAD_GPIO[7];
+`endif
+  force usb_phy_clk       =         `DUT_PATH.usb_top_pwr_wrapper.usb_top_clk;
+  force usb_core_clk      =         `DUT_PATH.usb_top_pwr_wrapper.usb_top_clk;
+  force usb_phy_rst_n     =         `DUT_PATH.usb_top_pwr_wrapper.usb_top_rst_n;
+  force `DUT_PATH.usb_top_pwr_wrapper.vbus_det   = 1'b1;
+`ifndef FPGA_PROJ
+  force `DUT_PATH.PAD_USB_VDDBUS  = 1'b1;
+`endif
+end
+
+`ifndef FPGA_T1
+assign #40 rx_dp1 = (!usb_reset)? ((tx_oe1)? `DUT_PATH.usb_tx_dp : 1'b1) : 1'b0;
+assign #40 rx_dn1 = (!usb_reset)? ((tx_oe1)? `DUT_PATH.usb_tx_dn : 1'b0) : 1'b0;
+`endif
+initial begin
+    error_cnt = 0;
+    test1_en  = 0;
+    test2_en  = 0;
+    test3_en  = 0;
+    //wd_cnt = 32'd0;
+    usb_reset = 1'b0;
+    tb_tx_valid = 1'b0;
+    //#2500us; 
+    #4200us; 
+    $display("cdc_en: %d",test2_en);
+    $display("msc_en: %d",test3_en);
+    if(test1_en)        setup1;
+    if(test2_en)        setup_cdc;
+    if(test3_en)        setup_msc;
+end
+
+
+`include "tests_lib.v"
+`include "tests.v"
+
+`endif

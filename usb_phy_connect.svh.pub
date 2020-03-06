@@ -1,0 +1,58 @@
+`ifndef USB_PHY_CONNECT_SVH
+`define USB_PHY_CONNECT_SVH
+//========================================
+// USB Model
+//========================================
+reg             usb_phy_clk;
+reg             usb_phy_rst_n;
+
+wire            rx_dp1;
+wire            rx_dn1;
+wire            tx_dp1;
+wire            tx_dn1;
+wire            tx_oe1;
+
+reg             tb_tx_valid;
+wire            tb_tx_ready;
+reg     [ 7: 0] tb_txdata;
+wire            tb_rx_valid;
+wire            tb_rx_active;
+wire            tb_rx_error;
+wire    [ 7: 0] tb_rxdata;
+
+reg             usb_reset;
+
+assign #40 PAD_GPIO[7]  = (!usb_reset)? ((~tx_oe1)? tx_dp1 : 1'bz) : 1'b0;
+assign #40 PAD_GPIO[8]  = (!usb_reset)? ((~tx_oe1)? tx_dn1 : 1'bz) : 1'b0;
+
+pullup      (PAD_GPIOi[7]);
+pulldown    (PAD_GPIO[8]);
+
+usb_phy tb_phy(
+    .clk            (usb_phy_clk        ),
+    .rst            (usb_phy_rst_n      ),
+
+    .phy_tx_mode    (1'b1               ),
+    .usb_rst        (                   ),
+
+    .rxd            (rx_dp1             ),
+    .rxdp           (rx_dp1             ),
+    .rxdn           (rx_dn1             ),
+
+    .txdp           (tx_dp1             ),
+    .txdn           (tx_dn1             ),
+    .txoe           (tx_oe1             ),
+
+    .DataIn_o       (tb_rxdata          ),
+    .RxValid_o      (tb_rx_valid        ),
+    .RxActive_o     (tb_rx_active       ),
+    .RxError_o      (tb_rx_error        ),
+
+    .DataOut_i      (tb_txdata          ),
+    .TxValid_i      (tb_tx_valid        ),
+    .TxReady_o      (tb_tx_ready        ),
+    .LineState_o    (                   )
+);
+
+
+`endif
