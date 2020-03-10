@@ -1,0 +1,702 @@
+WA 100 us
+
+# enable BLE core (sync size 3, ble enable )
+LE_WR_RG 00000000 000033E0
+
+# define BDADDR
+LE_WR_RG 00000024 CAFEFADE
+LE_WR_RG 00000028 0000DECA
+
+#define num device in WL
+LE_WR_RG 000000B8 00000202
+
+#define WL pointer
+LE_WR_RG 000000B0 00000280
+LE_WR_RG 000000B4 00000280
+
+# Define RAL pointer
+LE_WR_RG 00000120 00000600
+
+# Define number of RAL Structure
+LE_WR_RG 00000124 00000004
+
+# Create RAL Structure 1 / Device not connected and not in white list
+
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 00000600 1 0 0 1 0 1 1 0 1 1 88887777666655554444333322221111 C0FFEEFADE01 8EEA1D000001 11112222333344445555666677778888 DEADBEEFFADE
+
+# Create RAL Structure 2 / Device not connected and in white List / renewal request should not trigger anything
+
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 00000634 1 0 1 1 1 1 1 0 0 1 99998888777766665555444433332222 C0FFEEFADE02 8EEA1D000002 11112222333344445555666677778888 DEADBEEFFADE
+
+# Create RAL Structure 3 / Invalid structure
+
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 00000668 0 0 0 0 0 0 0 0 0 0 00000000000000000000000000000000 000000000000 000000000000 00000000000000000000000000000000 000000000000
+
+# Create RAL Structure 4 / Device connected and Excluded from white List
+
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 0000069C 1 0 1 0 1 1 1 1 0 1 AAAA9999888877776666555544443333 C0FFEEFADE03 8EEA1D000003 11112222333344445555666677778888 DEADBEEFFADE
+
+# Create RAL Structure 5 / Invalid structure
+
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 000006D0 0 0 0 0 0 0 0 0 0 0 00000000000000000000000000000000 000000000000 000000000000 00000000000000000000000000000000 000000000000
+
+
+#--------------------------------------------------------------------------------------------
+# 1st Exchange
+# This is active scanning with ADV_NONCONNECT and ADV_IND which expect SCAN_REQ response and which transmit SCAN_RESP, with device policy set to 0
+# RAL Structures 2 matches / 4 Rx descriptor used
+#--------------------------------------------------------------------------------------------
+
+# Define Rx Descriptor Pointer
+LE_WR_RG 0000002C 00000300
+
+# program a control structure
+
+               cs.format
+               | cs.dnabort
+               | | cs.rxbsy_en
+               | | | cs.txbsy_en
+               | | | | cs.pti
+               | | | | | cs.fcntoffset
+               | | | | | |   cs.linklbl
+               | | | | | |   | cs.cryp_en
+               | | | | | |   | | cs.crypt_mode
+               | | | | | |   | | | cs.rxthr
+               | | | | | |   | | | | cs.syncword
+               | | | | | |   | | | | |        cs.crcinit
+               | | | | | |   | | | | |        |      cs.ral_en
+               | | | | | |   | | | | |        |      | cs.ral_mode
+               | | | | | |   | | | | |        |      | | cs.local_rpa_sel
+               | | | | | |   | | | | |        |      | | | cs.filter_policy
+               | | | | | |   | | | | |        |      | | | | cs.ch_idx
+               | | | | | |   | | | | |        |      | | | | |  cs.hopint
+               | | | | | |   | | | | |        |      | | | | |  |  cs.fh_en
+               | | | | | |   | | | | |        |      | | | | |  |  | cs.txpwr
+               | | | | | |   | | | | |        |      | | | | |  |  | | cs.nesn
+               | | | | | |   | | | | |        |      | | | | |  |  | | | cs.sn
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | cs.rxwinsz
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  cs.rxwide
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | cs.txdescptr
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   cs.mincetime
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   cs.maxcetime
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   cs.llchmap
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          cs.nbchgood
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  cs.rxmaxbuf    
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | cs.rxmaxtime 
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | cs.sk
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | cs.iv
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | cs.txccmpktcnt
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | cs.rxccmpktcnt
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | cs.event_cnt      
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | cs.islastnesn     
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | cs.islastsn       
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | cs.islastmd        
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | cs.isowaitack      
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | cs.isorsvd         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | cs.isoretx         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | cs.isonesn         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | cs.isosn            
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | cs.isomd           
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | cs.isolast_empty   
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | | cs.isorx_buff_full 
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | | |
+LE_PC 00000200 9 0 0 1 0 000 A 0 0 1 8E89BED6 555555 1 0 0 0 25 00 1 0 0 0 08 1 2A0 000 00A 1FFFFFFFFF 25 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+
+# program the pointer
+# Tx
+
+          txptr        
+          |    nextptr             
+          |    |    txtype           
+          |    |    | txchsel         
+          |    |    | | txtxadd         
+          |    |    | | | txrxadd       
+          |    |    | | | | txadvlen    
+          |    |    | | | | |  txdataptr    
+          |    |    | | | | |  |           
+LE_PPT AD 02A0 02A0 3 0 0 0 22 42A0
+
+# Rx
+LE_PPR 0300 0340
+LE_PPR 0340 0380
+LE_PPR 0380 03C0
+LE_PPR 03C0 0400
+LE_PPR 0400 0000
+
+# program the advertising interval
+LE_WR_RG A0 00200250
+
+LE_WR_RG 90 00000007
+
+   
+# Program an event
+LE_WR_ET 00000008 02000002
+
+
+WA 1500 us
+
+# send ADV_NONCONN_IND packet
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 2 1 0 0C 161718191A1B8EEA1D000002 
+
+WA 500 us
+
+# send ADV_IND packet
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 0 1 0 22 DECACAFEFADE8EEA1D000003 
+
+# wait for TX done
+LE_IN 0
+
+# send SCAN_RESP packet
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 4 0 0 22 DECACAFEFADE161718191A1B 
+
+# wait for TX done
+WA 500 us
+
+# send ADV_DIRECT_IND packet
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 1 0 0 0C DECACAFEFADE161718191A1B 
+
+# wait for TX done
+WA 500 us
+
+# send ADV_DIRECT_IND packet
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 1 1 1 0C DECACAFEFADE161718191A1B 
+
+# wait for TX done
+WA 500 us
+
+# send ADV_DIRECT_IND packet
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 1 0 0 0C 161718191A1BDECACAFEFADE 
+
+# wait for Event done
+LE_IN 2
+
+WA 10 us
+
+# Check rx descriptor
+LE_CH_EM 00000300 00008340 0000FFFF
+LE_CH_EM 00000340 00008380 0000FFFF
+LE_CH_EM 00000380 000083C0 0000FFFF
+LE_CH_EM 000003C0 00008400 0000FFFF
+LE_CH_EM 00000400 00000000 0000FFFF
+
+# Check tx descriptor
+LE_CH_EM 000002A0 0000002A0 0000FFFF
+
+WA 10 us
+
+
+#--------------------------------------------------------------------------------------------
+# 2nd Exchange
+# This is active scanning with ADV_NONCONN_IND and ADV_IND which expect SCAN_REQ response and which transmit SCAN_RESP, with device policy set to 0
+# RAL Structure 4 matches / 1 Rx descriptor used
+#--------------------------------------------------------------------------------------------
+
+# Define Rx Descriptor Pointer
+LE_WR_RG 0000002C 00000300
+
+               cs.format
+               | cs.dnabort
+               | | cs.rxbsy_en
+               | | | cs.txbsy_en
+               | | | | cs.pti
+               | | | | | cs.fcntoffset
+               | | | | | |   cs.linklbl
+               | | | | | |   | cs.cryp_en
+               | | | | | |   | | cs.crypt_mode
+               | | | | | |   | | | cs.rxthr
+               | | | | | |   | | | | cs.syncword
+               | | | | | |   | | | | |        cs.crcinit
+               | | | | | |   | | | | |        |      cs.ral_en
+               | | | | | |   | | | | |        |      | cs.ral_mode
+               | | | | | |   | | | | |        |      | | cs.local_rpa_sel
+               | | | | | |   | | | | |        |      | | | cs.filter_policy
+               | | | | | |   | | | | |        |      | | | | cs.ch_idx
+               | | | | | |   | | | | |        |      | | | | |  cs.hopint
+               | | | | | |   | | | | |        |      | | | | |  |  cs.fh_en
+               | | | | | |   | | | | |        |      | | | | |  |  | cs.txpwr
+               | | | | | |   | | | | |        |      | | | | |  |  | | cs.nesn
+               | | | | | |   | | | | |        |      | | | | |  |  | | | cs.sn
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | cs.rxwinsz
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  cs.rxwide
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | cs.txdescptr
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   cs.mincetime
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   cs.maxcetime
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   cs.llchmap
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          cs.nbchgood
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  cs.rxmaxbuf    
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | cs.rxmaxtime 
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | cs.sk
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | cs.iv
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | cs.txccmpktcnt
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | cs.rxccmpktcnt
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | cs.event_cnt      
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | cs.islastnesn     
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | cs.islastsn       
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | cs.islastmd        
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | cs.isowaitack      
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | cs.isorsvd         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | cs.isoretx         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | cs.isonesn         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | cs.isosn            
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | cs.isomd           
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | cs.isolast_empty   
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | | cs.isorx_buff_full 
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | | |
+LE_PC 00000200 9 0 0 1 0 000 A 0 0 1 8E89BED6 555555 1 1 0 1 25 00 1 0 0 0 08 1 2A0 000 00D 1FFFFFFFFF 25 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+
+# Add device in WL
+LE_WR_EM 00000280 00000000
+LE_WR_EM 00000284 05060000
+LE_WR_EM 00000288 01020304
+
+# program the pointer
+# Tx
+          txptr        
+          |    nextptr             
+          |    |    txtype           
+          |    |    | txchsel         
+          |    |    | | txtxadd         
+          |    |    | | | txrxadd       
+          |    |    | | | | txadvlen    
+          |    |    | | | | |  txdataptr    
+          |    |    | | | | |  |           
+LE_PPT AD 02A0 02A0 3 0 0 0 0C 42A0
+
+# Rx
+LE_PPR 0300 0340
+LE_PPR 0340 0380
+LE_PPR 0380 0000
+
+# program the advertising interval
+LE_WR_RG A0 00200250
+
+LE_WR_RG 90 00000007
+
+   
+# Program an event
+LE_WR_ET 00000018 02000002
+
+
+WA 7500 us
+
+# send ADV_IND packet which does not pass the device filtering
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 0 0 0 22 DECACAFEFADE161718191A1B 
+
+WA 500 us
+
+# send ADV_IND packet which passes the device filtering
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 0 1 0 22 DECACAFEFADE8EEA1D000003 
+
+# wait for TX done
+LE_IN 0
+
+# send SCAN_RESP packet
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 4 1 0 22 DEADBEEF666ADECACAFEFADE8EEA1D000003 
+
+DI wait for Event done
+LE_IN 2
+
+# Check rx descriptor
+LE_CH_EM 00000300 00008340 0000FFFF
+LE_CH_EM 00000340 00008380 0000FFFF
+LE_CH_EM 00000380 00000000 0000FFFF
+
+# Check tx descriptor
+LE_CH_EM 000002A0 0000002A0 0000FFFF
+
+WA 100 us
+
+#--------------------------------------------------------------------------------------------
+# 3rd Exchange
+# This is active scanning with / Check ADV_DIRECT_IND report
+# RAL Structure 1 matches / 4 Rx descriptor used
+#--------------------------------------------------------------------------------------------
+# Define RAL pointer
+LE_WR_RG 00000120 00000600
+
+# Define number of RAL Structure
+LE_WR_RG 00000124 00000001
+
+# Define Rx Descriptor Pointer
+LE_WR_RG 0000002C 00000300
+
+               cs.format
+               | cs.dnabort
+               | | cs.rxbsy_en
+               | | | cs.txbsy_en
+               | | | | cs.pti
+               | | | | | cs.fcntoffset
+               | | | | | |   cs.linklbl
+               | | | | | |   | cs.cryp_en
+               | | | | | |   | | cs.crypt_mode
+               | | | | | |   | | | cs.rxthr
+               | | | | | |   | | | | cs.syncword
+               | | | | | |   | | | | |        cs.crcinit
+               | | | | | |   | | | | |        |      cs.ral_en
+               | | | | | |   | | | | |        |      | cs.ral_mode
+               | | | | | |   | | | | |        |      | | cs.local_rpa_sel
+               | | | | | |   | | | | |        |      | | | cs.filter_policy
+               | | | | | |   | | | | |        |      | | | | cs.ch_idx
+               | | | | | |   | | | | |        |      | | | | |  cs.hopint
+               | | | | | |   | | | | |        |      | | | | |  |  cs.fh_en
+               | | | | | |   | | | | |        |      | | | | |  |  | cs.txpwr
+               | | | | | |   | | | | |        |      | | | | |  |  | | cs.nesn
+               | | | | | |   | | | | |        |      | | | | |  |  | | | cs.sn
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | cs.rxwinsz
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  cs.rxwide
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | cs.txdescptr
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   cs.mincetime
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   cs.maxcetime
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   cs.llchmap
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          cs.nbchgood
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  cs.rxmaxbuf    
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | cs.rxmaxtime 
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | cs.sk
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | cs.iv
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | cs.txccmpktcnt
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | cs.rxccmpktcnt
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | cs.event_cnt      
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | cs.islastnesn     
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | cs.islastsn       
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | cs.islastmd        
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | cs.isowaitack      
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | cs.isorsvd         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | cs.isoretx         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | cs.isonesn         
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | cs.isosn            
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | cs.isomd           
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | cs.isolast_empty   
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | | cs.isorx_buff_full 
+               | | | | | |   | | | | |        |      | | | | |  |  | | | | |  | |   |   |   |          |  | | | | | | | | | | | | | | | | | |
+LE_PC 00000200 9 0 0 1 0 000 A 0 0 1 8E89BED6 555555 1 1 0 0 25 00 1 0 0 0 09 1 2A0 000 010 1FFFFFFFFF 25 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+
+# program the pointer
+# Tx
+          txptr        
+          |    nextptr             
+          |    |    txtype           
+          |    |    | txchsel         
+          |    |    | | txtxadd         
+          |    |    | | | txrxadd       
+          |    |    | | | | txadvlen    
+          |    |    | | | | |  txdataptr    
+          |    |    | | | | |  |           
+LE_PPT AD 02A0 02A0 3 0 0 0 0C 42A0
+
+# Rx
+LE_PPR 0300 0340
+LE_PPR 0340 0380
+LE_PPR 0380 03C0
+LE_PPR 03C0 0000
+
+# program the advertising interval
+LE_WR_RG A0 00200250
+
+LE_WR_RG 90 00000007
+
+   
+# Program an event
+LE_WR_ET 00000018 02000002
+
+
+WA 7500 us
+
+
+WA 500 us
+
+
+# Prepare RAL entry / Device not connected and not in white list
+
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 00000600 1 0 0 0 0 1 0 0 1 1 88887777666655554444333322221111 C0FFEEFADE01 8EEA1D000001 11112222333344445555666677778888 DEADBEEFFADE
+
+
+# send ADV_DIRECT_IND packet which does not pass RPA resolution (peer and local)
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 1 1 1 0C 7EADBEE8057E60FFEEBAD02B
+
+WA 500 us
+
+
+
+
+# Restore RAL entry
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 00000600 1 0 0 0 0 1 0 0 1 1 88887777666655554444333322221111 C0FFEEFADE01 8EEA1D000001 11112222333344445555666677778888 DEADBEEFFADE
+
+# send ADV_DIRECT_IND packet which does half pass RPA resolution (local NOK / peer OK)
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 1 1 1 0C 7EADBEE8057E60FFEEBAD32B
+
+WA 500 us
+
+
+
+
+# Restore RAL entry
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 00000600 1 0 0 0 0 1 0 0 1 1 88887777666655554444333322221111 C0FFEEFADE01 8EEA1D000001 11112222333344445555666677778888 DEADBEEFFADE
+
+
+# send ADV_DIRECT_IND packet which does half pass RPA resolution (peer NOK / local OK)
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 1 1 1 0C 7EADBEE8257E60FFEEB0D32B
+
+WA 500 us
+
+
+
+
+# Restore RAL entry
+               entry_valid
+               | connected
+               | | in_whlist
+               | | | local_rpa_valid
+               | | | | local_rpa_renew
+               | | | | | local_irk_valid
+               | | | | | | peer_rpa_valid
+               | | | | | | | peer_rpa_renew
+               | | | | | | | | peer_irk_valid
+               | | | | | | | | | peer_id_type
+               | | | | | | | | | | peer_irk
+               | | | | | | | | | | |                                peer_rpa
+               | | | | | | | | | | |                                |            peer_id
+               | | | | | | | | | | |                                |            |            local_irk
+               | | | | | | | | | | |                                |            |            |                                local_rpa
+               | | | | | | | | | | |                                |            |            |                                |
+LE_RS 00000600 1 0 0 0 0 1 0 0 1 1 88887777666655554444333322221111 C0FFEEFADE01 8EEA1D000001 11112222333344445555666677778888 DEADBEEFFADE
+
+# send ADV_DIRECT_IND packet which does pass RPA resolution (both OK)
+         access_code        
+         |        pdutype 
+         |        | txadd   
+         |        | | rxadd   
+         |        | | | length   
+         |        | | | |  payload
+         |        | | | |  |
+LE_SP AD 8E89BEd6 1 1 1 0C 7EADBEE8257E60FFEEBAD32B
+
+
+
+
+LE_IN 2
+
+# Check rx descriptor
+LE_CH_EM 00000300 00008340 0000FFFF
+LE_CH_EM 00000340 00008380 0000FFFF
+LE_CH_EM 00000380 000003C0 0000FFFF
+LE_CH_EM 000003C0 00000000 0000FFFF
+
+# Check tx descriptor
+LE_CH_EM 000002A0 0000002A0 0000FFFF
+
+WA 100 us
+
+
+QT 

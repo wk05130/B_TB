@@ -1,0 +1,373 @@
+#!/usr/bin/perl
+########################################################
+# #  this script is used to parse ble txt cfg file   # #
+# #  author : ppzhang                                # #
+# #  date   : 2020.01.20                             # #
+# #  version: 1.0                                    # #
+# ######################################################
+use Getopt::Long;
+
+my $usage = << "HERE";
+   -path   = path to the txt file   :  specify which dir the txt files exist
+   -help                            :  show help info           
+HERE
+
+my $path = "/proj/soc707/common/HW/soc707_a0/ble_top/rw-dm-hw-v8_0_23/HW/IPs/BLE/HW/rw_ble_top/simu/testcases";
+GetOptions(
+	"path=s"  => \$path,
+	"help|h"  => \$help
+);
+
+die $usage if $help;
+
+my $testcase_dir = $path;
+opendir my $dh,$testcase_dir or die "can not open $testcase_dir: $!";
+#out put file dir build
+if(! -e "./cfg"){
+    mkdir "cfg";
+}else{
+    system("cd ./cfg && rm * -rf");
+}
+#begin parser each input txt file
+my $le_ppt_f;
+my $le_ppt_cnt = 1;
+my $ppt_match_mode;
+my $ppt_str_cascade;
+
+my $le_pc_f;
+my $le_pc_cnt = 1;
+my $pc_match_mode;
+my $pc_str_cascade;
+
+my $le_sp_f;
+my $le_sp_cnt = 1;
+my $sp_match_mode;
+my $sp_str_cascade;
+
+my $le_rs_f;
+my $le_rs_cnt = 1;
+my $rs_match_mode;
+my $rs_str_cascade;
+
+my $hash = {};
+
+my $key_hash = {};
+#open INCLUDE_FILE," > ./cfg/cfg_include.sv" or die "can not open file ./cfg/cfg_include.sv: $!";
+open PATTERM_FILE," > ./patterm" or die "can not open file ./patterm: $!";
+
+foreach (readdir $dh){
+    my $input_file_name = $_;
+    if($_ eq '.' or $_ eq '..'){
+       next;
+    }
+    if($_ eq "encrypt_connect_TxCoded_Rx1M"){
+       next;
+    }
+    if(-d "$testcase_dir/$_" ){
+        #print INCLUDE_FILE "`include \"${input_file_name}_cfg.sv\"\n";
+       #debug info
+       #print "one dir : $_\n";
+       open INPUT_FILE," < $testcase_dir/$_/input.txt" or die "can not open file $testcase_dir/$_/input.txt: $!";
+       open OUTPUT_FILE," > ./cfg/${input_file_name}_cfg.sv" or die "can not open file ./cfg/${input_file_name}_cfg.sv: $!";
+       while(<INPUT_FILE>){
+           #used to figure out all the patterm
+           if(/^(\w+)\s+(\w+)/){
+              if(! exists $key_hash->{$1}){
+                 $key_hash->{$1} = "1";
+                 print PATTERM_FILE $1."\n";
+              }
+           }
+           if(/^WA\s+([\d]+)\s+(\w+)/){
+               print OUTPUT_FILE "# $1$2;\n";
+           }
+           #le_wr_rg parser
+           if(/^LE_WR_RG\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "ahb_w_data[0] = 32'h$2;
+m_prot = 1'b0;
+send_ahb_burst_trust(`SINGLE_BURST,1,svt_ahb_transaction::WRITE,svt_ahb_transaction::BURST_SIZE_32BIT,`BLE_TOP_BASE_ADDRESS+32'h$1,ahb_w_data,m_prot);\n";
+           }
+           #le_wr16_rg parser
+           if(/^LE_WR16_RG\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "ahb_w_data[0] = 32'h$2;
+m_prot = 1'b0;
+LE_WR16_RG(`SINGLE_BURST,1,svt_ahb_transaction::WRITE,svt_ahb_transaction::BURST_SIZE_32BIT,`BLE_TOP_BASE_ADDRESS+32'h$1,ahb_w_data,m_prot);\n";
+           }
+           #le_wr_et parser
+           if(/^LE_WR_ET\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "ahb_w_data[0] = 32'h$2;
+m_prot = 1'b0;
+send_ahb_burst_trust(`SINGLE_BURST,1,svt_ahb_transaction::WRITE,svt_ahb_transaction::BURST_SIZE_32BIT,`BLE_EM_BASE_ADDRESS+32'h$1,ahb_w_data,m_prot);\n";
+           }
+           #le_ch_em parser
+           if(/^LE_CH_EM\s+(\w+)\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "LE_CH_EM(.a(32'h$1),b(32'h$2),.c(32'h$3));\n";
+           }
+           #le_sl parser
+           if(/^LE_SL\s+(\w+)\s+(\w+)\s+(\w+)\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "LE_SL(.mode($1),sleep_duration($2),.twosc($3),.twrm($4),.extwkupdsb($5));\n";
+           }
+           #le_ewu parser
+           if(/^LE_EWU\s+(\w+)/){
+               print OUTPUT_FILE "LE_EWU($1);\n";
+           }
+           #le_wcx parser
+           if(/^LE_WCX\s+(\w+)\s+(\w+)\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "LE_WCX(.coex_enable($1),.ifs_time($2),.txwin_time($3),.rxwin_time($4));\n";
+           }
+           #DI parser
+           if(/^DI\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "`uvm_info(get_type_name(),\"$1 $2\",UVM_LOW)\n";
+           }
+           #le_ch_rg parser
+           if(/^LE_CH_RG\s+(\w+)\s+(\w+)\s+(\w+)/){
+               print OUTPUT_FILE "LE_CH_RG(.a(32'h$1),b(32'h$2),.c(32'h$3));\n";
+           }
+           #le_in parser
+           if(/^LE_IN\s+(\w+)/){
+              my $append;
+              my $index;
+              my $data_width;
+              $append = $1."APPEND";
+              $index = index($append,"APPEND");
+              $data_width = $index*4;
+              print OUTPUT_FILE "LE_IN(${data_width}'h$1);\n";
+           }
+           #le_ppr parser
+           if(/^LE_PPR\s+(\w+)\s+(\w+)/){
+              my $append;
+              my $index;
+              my $data_width1;
+              my $data_width2;
+              my $data_width3;
+              my $dec;
+              my $hex;
+              $dec = hex($1);
+              $dec = $dec + 12;
+              $hex = sprintf "%x",$dec;
+              $hex = uc $hex;
+              $append = $1."APPEND";
+              $index = index($append,"APPEND");
+              $data_width1 = $index*4;
+              $append = $2."APPEND";
+              $index = index($append,"APPEND");
+              $data_width2 = $index*4;
+              $append = $hex."APPEND";
+              $index = index($append,"APPEND");
+              $data_width3 = $index*4;
+              print OUTPUT_FILE "cfg_rx_descr(.addr_em_offset(${data_width1}'h$1),.nextptr(${data_width2}'h$2),.rxdataptr(${data_width3}'h$hex));\n";
+           }
+           #le_ppt parser
+           if(/^LE_PPT\s+\w+${ppt_match_mode}/){
+               #print $ppt_match_mode,"\n";
+               #clear ppt_f
+               my $cnt;
+               $le_ppt_f = 0;
+               for($cnt=1;$cnt <= $le_ppt_cnt;$cnt ++){
+                   my $cnt_append;
+                   my $index;
+                   my $data_width;
+                   $cnt_append = $$cnt."APPEND";
+                   $index = index($cnt_append,"APPEND");
+                   $data_width = $index*4;
+                   if($le_ppt_cnt eq $cnt){
+                      $ppt_str_cascade = $ppt_str_cascade.".$hash->{$cnt}(${data_width}'h$$cnt)";
+                      #print $ppt_str_cascade,"\n";
+                  }elsif($cnt eq "1"){
+                      $ppt_str_cascade = $ppt_str_cascade.".addr_em_offset(${data_width}'h$$cnt)";
+                  }else{
+                      $ppt_str_cascade = $ppt_str_cascade.".$hash->{$cnt}(${data_width}'h$$cnt),";
+                   }
+               }
+               #print $ppt_str_cascade,"\n";
+               print OUTPUT_FILE "cfg_tx_descr($ppt_str_cascade);\n";
+               #print $ppt_str_cascade,"\n";
+               $ppt_str_cascade = "";
+           }
+           if(/(tx_ptr)/){
+              $ppt_match_mode = "";
+              $le_ppt_cnt = 1;
+
+              $le_ppt_f = 1;
+              $hash->{$le_ppt_cnt} = $1;
+              $ppt_match_mode = $ppt_match_mode."\\s+(\\w+)";
+              #print $le_ppt_cnt," tx_ptr \n";
+           }elsif(/(txptr)/){
+              $ppt_match_mode = "";
+              $le_ppt_cnt = 1;
+
+              $le_ppt_f = 1;
+              $hash->{$le_ppt_cnt} = $1;
+              $ppt_match_mode = $ppt_match_mode."\\s+(\\w+)";
+              #print $le_ppt_cnt," txptr \n";
+           }
+           elsif($le_ppt_f == 1){
+              if(/(\w+)/){
+                 $le_ppt_cnt ++;
+                 $hash->{$le_ppt_cnt} = $1;
+                 $ppt_match_mode = $ppt_match_mode."\\s+(\\w+)";
+                 #print $le_ppt_cnt," $1\n";
+              }
+           }
+           #le_pc parser
+           if(/^LE_PC\s+(\w+)${pc_match_mode}/){
+               #print $pc_match_mode,"\n";
+               #clear pc_f
+               my $cnt;
+               $le_pc_f = 0;
+               for($cnt=1;$cnt <= $le_pc_cnt+1;$cnt ++){
+                   my $cnt_append;
+                   my $index;
+                   my $data_width;
+                   $cnt_append = $$cnt."APPEND";
+                   $index = index($cnt_append,"APPEND");
+                   $data_width = $index*4;
+                   if($le_pc_cnt+1 eq $cnt){
+                      $pc_str_cascade = $pc_str_cascade.".$hash->{$cnt-1}(${data_width}'h$$cnt)";
+                      #print $pc_str_cascade,"\n";
+                  }elsif($cnt eq "1"){
+                      $pc_str_cascade = ".addr_em_offset(${data_width}'h$$cnt),";
+                  }else{
+                      $pc_str_cascade = $pc_str_cascade.".$hash->{$cnt-1}(${data_width}'h$$cnt),";
+                   }
+               }
+               #print $pc_str_cascade,"\n";
+               print OUTPUT_FILE "cfg_cnt_str($pc_str_cascade);\n";
+               #print $pc_str_cascade,"\n";
+               $pc_str_cascade = "";
+           }
+           if(/cs\.(format)/){
+              $pc_match_mode = "";
+              $le_pc_cnt = 1;
+
+              $le_pc_f = 1;
+              $hash->{$le_pc_cnt} = $1;
+              $pc_match_mode = $pc_match_mode."\\s+(\\w+)";
+              #print $le_pc_cnt," format \n";
+           }
+           elsif($le_pc_f == 1){
+              if(/cs\.(\w+)/){
+                 $le_pc_cnt ++;
+                 $hash->{$le_pc_cnt} = $1;
+                 $pc_match_mode = $pc_match_mode."\\s+(\\w+)";
+                 #print $le_pc_cnt," $1\n";
+              }
+           }
+           #le_sp parser
+           if(/^LE_SP\s+(\w+)${sp_match_mode}/){
+               my $AD_or_DA;
+               my @payload;
+               my $payload_width;
+               my $join;
+               #clear sp_f
+               my $cnt;
+               $le_sp_f = 0;
+               for($cnt=1;$cnt <= $le_sp_cnt+1;$cnt ++){
+                   my $cnt_append;
+                   my $index;
+                   my $data_width;
+                   $cnt_append = $$cnt."APPEND";
+                   $index = index($cnt_append,"APPEND");
+                   $data_width = $index*4;
+                   if($le_sp_cnt+1 eq $cnt){
+                      $payload_width = $index;
+                      @payload = split //,$$cnt;
+                      $sp_str_cascade = $sp_str_cascade.".$hash->{$cnt-1}(payload)";
+                  }elsif($cnt eq "1"){
+                      if($$cnt eq "AD"){
+                         $AD_or_DA = "AD";
+                      }else{
+                         $AD_or_DA = "DA";
+                      }
+                  }else{
+                      $sp_str_cascade = $sp_str_cascade.".$hash->{$cnt-1}(${data_width}'h$$cnt),";
+                   }
+               }
+               #print $sp_str_cascade,"\n";
+               #print $le_sp_cnt,"\n";
+               #print $sp_match_mode,"\n";
+               #print $sp_str_cascade,"\n";
+               my $index;
+               for($i=0;$i<$payload_width;$i++){
+                  if($i%2 == 0){
+                     $join = $payload[$i];
+                     $index = $i/2;
+                  }else{
+                     $join = $payload[$i].$join;
+                     print OUTPUT_FILE "payload[$index] = 8'h$join;\n";
+                     $join = "";
+                  }
+               }
+
+               if($AD_or_DA eq "DA"){
+                  print OUTPUT_FILE "tb_send_data_seq($sp_str_cascade);\n";
+               }else{
+                  print OUTPUT_FILE "tb_send_addr_seq($sp_str_cascade);\n";
+               }
+               print OUTPUT_FILE "payload.delete();\n";
+               #need to clear for continuous LE SP
+               $sp_str_cascade = "";
+           }
+           if(/(access_code)/){
+              $sp_match_mode = "";
+              $le_sp_cnt = 1;
+
+              $le_sp_f = 1;
+              $hash->{$le_sp_cnt} = $1;
+              $sp_match_mode = $sp_match_mode."\\s+(\\w+)";
+              #print $le_sp_cnt," access_code \n";
+           }
+           elsif($le_sp_f == 1){
+              if(/(\w+)/){
+                 $le_sp_cnt ++;
+                 $hash->{$le_sp_cnt} = $1;
+                 $sp_match_mode = $sp_match_mode."\\s+(\\w+)";
+                 #print $le_sp_cnt," $1\n";
+              }
+           }
+            #le_rs parser
+           if(/^LE_RS\s+(\w+)${rs_match_mode}/){
+               #print $rs_match_mode,"\n";
+               #clear pc_f
+               my $cnt;
+               $le_rs_f = 0;
+               for($cnt=1;$cnt <= $le_rs_cnt+1;$cnt ++){
+                   my $cnt_append;
+                   my $index;
+                   my $data_width;
+                   $cnt_append = $$cnt."APPEND";
+                   $index = index($cnt_append,"APPEND");
+                   $data_width = $index*4;
+                   if($le_rs_cnt+1 eq $cnt){
+                      $rs_str_cascade = $rs_str_cascade.".$hash->{$cnt-1}(${data_width}'h$$cnt)";
+                      #print $rs_str_cascade,"\n";
+                  }elsif($cnt eq "1"){
+                      $rs_str_cascade = ".addr_em_offset(${data_width}'h$$cnt),";
+                  }else{
+                      $rs_str_cascade = $rs_str_cascade.".$hash->{$cnt-1}(${data_width}'h$$cnt),";
+                   }
+               }
+               #print $rs_str_cascade,"\n";
+               print OUTPUT_FILE "cfg_ral_str($rs_str_cascade);\n";
+               #print $rs_str_cascade,"\n";
+               $rs_str_cascade = "";
+           }
+           if(/(entry_valid)/){
+              $rs_match_mode = "";
+              $le_rs_cnt = 1;
+
+              $le_rs_f = 1;
+              $hash->{$le_rs_cnt} = $1;
+              $rs_match_mode = $rs_match_mode."\\s+(\\w+)";
+              #print $le_rs_cnt," format \n";
+           }
+           elsif($le_rs_f == 1){
+              if(/(\w+)/){
+                 $le_rs_cnt ++;
+                 $hash->{$le_rs_cnt} = $1;
+                 $rs_match_mode = $rs_match_mode."\\s+(\\w+)";
+                 #print $le_rs_cnt," $1\n";
+              }
+           }
+       }
+    }
+}
