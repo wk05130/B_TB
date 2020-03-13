@@ -1,0 +1,584 @@
+`ifndef COMMON_DEF_SVH
+`define COMMON_DEF_SVH
+
+`define DUT_WRAPPER_PATH top_tb.DUT_WRAPPER
+`define DUT_PATH         top_tb.DUT_WRAPPER.DUT
+
+`define MSG_PRINT_MSG_LEN           (32'h200)
+`define SOC_SV_C_SHARE_LEN          (32'h200)
+`define MSG_PRINT_MSG_MARK          (32'hABCDABCD)
+`define MSG_PRINT_ERR_MSG_MARK      (32'hCDABCDAB)
+`define SIM_END_MARK                (32'ha5a55a5a)
+
+`define DBG_BASE              (32'h5201cba0)
+`define MSG_PRINT_MARK_ADR    (`DBG_BASE)
+`define MSG_PRINT_ADR         (`DBG_BASE+4)
+`define SIM_END_MARK_ADRR     (`DBG_BASE+`MSG_PRINT_MSG_LEN + 4 + `SOC_SV_C_SHARE_LEN)
+
+`define COV_VAL_WAIT_GET(index, val) \
+       (( ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*0))) >> ((index)%8 + 8*0) ) << 0 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*1))) >> ((index)%8 + 8*1) ) << 1 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*2))) >> ((index)%8 + 8*2) ) << 2 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*3))) >> ((index)%8 + 8*3) ) << 3 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*4))) >> ((index)%8 + 8*4) ) << 4 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*5))) >> ((index)%8 + 8*5) ) << 5 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*6))) >> ((index)%8 + 8*6) ) << 6 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*7))) >> ((index)%8 + 8*7) ) << 7 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*8))) >> ((index)%8 + 8*8) ) << 8 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*9))) >> ((index)%8 + 8*9) ) << 9 )  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*10)))>> ((index)%8 + 8*10)) << 10)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*11)))>> ((index)%8 + 8*11)) << 11)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*12)))>> ((index)%8 + 8*12)) << 12)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*13)))>> ((index)%8 + 8*13)) << 13)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*14)))>> ((index)%8 + 8*14)) << 14)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*15)))>> ((index)%8 + 8*15)) << 15)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*16)))>> ((index)%8 + 8*16)) << 16)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*17)))>> ((index)%8 + 8*17)) << 17)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*18)))>> ((index)%8 + 8*18)) << 18)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*19)))>> ((index)%8 + 8*19)) << 19)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*20)))>> ((index)%8 + 8*20)) << 20)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*21)))>> ((index)%8 + 8*21)) << 21)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*22)))>> ((index)%8 + 8*22)) << 22)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*23)))>> ((index)%8 + 8*23)) << 23)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*24)))>> ((index)%8 + 8*24)) << 24)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*25)))>> ((index)%8 + 8*25)) << 25)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*26)))>> ((index)%8 + 8*26)) << 26)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*27)))>> ((index)%8 + 8*27)) << 27)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*28)))>> ((index)%8 + 8*28)) << 28)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*29)))>> ((index)%8 + 8*29)) << 29)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*30)))>> ((index)%8 + 8*30)) << 30)  | \
+          ( ( ((val[(index)/8]) & (256'b1 << ((index)%8 + 8*31)))>> ((index)%8 + 8*31)) << 31)  ) & 32'hffffffff) 
+     `define COV_VAL_WAIT_GET128(index, val) \
+       (( ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*0))) >> ((index)%4 + 4*0) ) << 0 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*1))) >> ((index)%4 + 4*1) ) << 1 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*2))) >> ((index)%4 + 4*2) ) << 2 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*3))) >> ((index)%4 + 4*3) ) << 3 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*4))) >> ((index)%4 + 4*4) ) << 4 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*5))) >> ((index)%4 + 4*5) ) << 5 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*6))) >> ((index)%4 + 4*6) ) << 6 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*7))) >> ((index)%4 + 4*7) ) << 7 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*8))) >> ((index)%4 + 4*8) ) << 8 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*9))) >> ((index)%4 + 4*9) ) << 9 )  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*10)))>> ((index)%4 + 4*10)) << 10)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*11)))>> ((index)%4 + 4*11)) << 11)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*12)))>> ((index)%4 + 4*12)) << 12)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*13)))>> ((index)%4 + 4*13)) << 13)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*14)))>> ((index)%4 + 4*14)) << 14)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*15)))>> ((index)%4 + 4*15)) << 15)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*16)))>> ((index)%4 + 4*16)) << 16)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*17)))>> ((index)%4 + 4*17)) << 17)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*18)))>> ((index)%4 + 4*18)) << 18)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*19)))>> ((index)%4 + 4*19)) << 19)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*20)))>> ((index)%4 + 4*20)) << 20)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*21)))>> ((index)%4 + 4*21)) << 21)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*22)))>> ((index)%4 + 4*22)) << 22)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*23)))>> ((index)%4 + 4*23)) << 23)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*24)))>> ((index)%4 + 4*24)) << 24)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*25)))>> ((index)%4 + 4*25)) << 25)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*26)))>> ((index)%4 + 4*26)) << 26)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*27)))>> ((index)%4 + 4*27)) << 27)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*28)))>> ((index)%4 + 4*28)) << 28)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*29)))>> ((index)%4 + 4*29)) << 29)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*30)))>> ((index)%4 + 4*30)) << 30)  | \
+          ( ( ((val[(index)/4]) & (128'b1 << ((index)%4 + 4*31)))>> ((index)%4 + 4*31)) << 31)  ) & 32'hffffffff) 
+`define VAL_COV_SET(val, index) \
+        ((((((val)&32'h00000001) >> 0)<< (((index)%8 + 8*0))) | \
+          ((((val)&32'h00000002) >> 1)<< (((index)%8 + 8*1))) | \
+          ((((val)&32'h00000004) >> 2)<< (((index)%8 + 8*2))) | \
+          ((((val)&32'h00000008) >> 3)<< (((index)%8 + 8*3))) | \
+          ((((val)&32'h00000010) >> 4)<< (((index)%8 + 8*4))) | \
+          ((((val)&32'h00000020) >> 5)<< (((index)%8 + 8*5))) | \
+          ((((val)&32'h00000040) >> 6)<< (((index)%8 + 8*6))) | \
+          ((((val)&32'h00000080) >> 7)<< (((index)%8 + 8*7))) | \
+          ((((val)&32'h00000100) >> 8)<< (((index)%8 + 8*8))) | \
+          ((((val)&32'h00000200) >> 9)<< (((index)%8 + 8*9))) | \
+          ((((val)&32'h00000400) >>10)<< (((index)%8 + 8*10)))| \
+          ((((val)&32'h00000800) >>11)<< (((index)%8 + 8*11)))| \
+          ((((val)&32'h00001000) >>12)<< (((index)%8 + 8*12)))| \
+          ((((val)&32'h00002000) >>13)<< (((index)%8 + 8*13)))| \
+          ((((val)&32'h00004000) >>14)<< (((index)%8 + 8*14)))| \
+          ((((val)&32'h00008000) >>15)<< (((index)%8 + 8*15)))| \
+          ((((val)&32'h00010000) >>16)<< (((index)%8 + 8*16)))| \
+          ((((val)&32'h00020000) >>17)<< (((index)%8 + 8*17)))| \
+          ((((val)&32'h00040000) >>18)<< (((index)%8 + 8*18)))| \
+          ((((val)&32'h00080000) >>19)<< (((index)%8 + 8*19)))| \
+          ((((val)&32'h00100000) >>20)<< (((index)%8 + 8*20)))| \
+          ((((val)&32'h00200000) >>21)<< (((index)%8 + 8*21)))| \
+          ((((val)&32'h00400000) >>22)<< (((index)%8 + 8*22)))| \
+          ((((val)&32'h00800000) >>23)<< (((index)%8 + 8*23)))| \
+          ((((val)&32'h01000000) >>24)<< (((index)%8 + 8*24)))| \
+          ((((val)&32'h02000000) >>25)<< (((index)%8 + 8*25)))| \
+          ((((val)&32'h04000000) >>26)<< (((index)%8 + 8*26)))| \
+          ((((val)&32'h08000000) >>27)<< (((index)%8 + 8*27)))| \
+          ((((val)&32'h10000000) >>28)<< (((index)%8 + 8*28)))| \
+          ((((val)&32'h20000000) >>29)<< (((index)%8 + 8*29)))| \
+          ((((val)&32'h40000000) >>30)<< (((index)%8 + 8*30)))| \
+          ((((val)&32'h80000000) >>31)<< (((index)%8 + 8*31))) ) & 256'hffffffff_ffffffff_ffffffff_ffffffff_ffffffff_ffffffff_ffffffff_ffffffff) 
+`define VAL_COV_SET128(val, index) \
+        ((((((val)&32'h00000001) >> 0)<< (((index)%4 + 4*0))) | \
+          ((((val)&32'h00000002) >> 1)<< (((index)%4 + 4*1))) | \
+          ((((val)&32'h00000004) >> 2)<< (((index)%4 + 4*2))) | \
+          ((((val)&32'h00000008) >> 3)<< (((index)%4 + 4*3))) | \
+          ((((val)&32'h00000010) >> 4)<< (((index)%4 + 4*4))) | \
+          ((((val)&32'h00000020) >> 5)<< (((index)%4 + 4*5))) | \
+          ((((val)&32'h00000040) >> 6)<< (((index)%4 + 4*6))) | \
+          ((((val)&32'h00000080) >> 7)<< (((index)%4 + 4*7))) | \
+          ((((val)&32'h00000100) >> 8)<< (((index)%4 + 4*8))) | \
+          ((((val)&32'h00000200) >> 9)<< (((index)%4 + 4*9))) | \
+          ((((val)&32'h00000400) >>10)<< (((index)%4 + 4*10)))| \
+          ((((val)&32'h00000800) >>11)<< (((index)%4 + 4*11)))| \
+          ((((val)&32'h00001000) >>12)<< (((index)%4 + 4*12)))| \
+          ((((val)&32'h00002000) >>13)<< (((index)%4 + 4*13)))| \
+          ((((val)&32'h00004000) >>14)<< (((index)%4 + 4*14)))| \
+          ((((val)&32'h00008000) >>15)<< (((index)%4 + 4*15)))| \
+          ((((val)&32'h00010000) >>16)<< (((index)%4 + 4*16)))| \
+          ((((val)&32'h00020000) >>17)<< (((index)%4 + 4*17)))| \
+          ((((val)&32'h00040000) >>18)<< (((index)%4 + 4*18)))| \
+          ((((val)&32'h00080000) >>19)<< (((index)%4 + 4*19)))| \
+          ((((val)&32'h00100000) >>20)<< (((index)%4 + 4*20)))| \
+          ((((val)&32'h00200000) >>21)<< (((index)%4 + 4*21)))| \
+          ((((val)&32'h00400000) >>22)<< (((index)%4 + 4*22)))| \
+          ((((val)&32'h00800000) >>23)<< (((index)%4 + 4*23)))| \
+          ((((val)&32'h01000000) >>24)<< (((index)%4 + 4*24)))| \
+          ((((val)&32'h02000000) >>25)<< (((index)%4 + 4*25)))| \
+          ((((val)&32'h04000000) >>26)<< (((index)%4 + 4*26)))| \
+          ((((val)&32'h08000000) >>27)<< (((index)%4 + 4*27)))| \
+          ((((val)&32'h10000000) >>28)<< (((index)%4 + 4*28)))| \
+          ((((val)&32'h20000000) >>29)<< (((index)%4 + 4*29)))| \
+          ((((val)&32'h40000000) >>30)<< (((index)%4 + 4*30)))| \
+          ((((val)&32'h80000000) >>31)<< (((index)%4 + 4*31))) ) & 128'hffffffff_ffffffff_ffffffff_ffffffff) 
+
+
+
+
+
+`define GPIO_NUN_ALL      38
+`define GPIO_NUN_EXCEPT_FLASH 32
+`define GPIO_FUN_NUM_ALL  24
+`define PINMUX_GPIO2DUT        3'b000
+`define PINMUX_DUT2GPIO        3'b001
+`define PINMUX_GPIO_DUT_OE     3'b010
+`define PINMUX_GPIO_DUT_OEN    3'b110
+
+`ifndef FPGA_PROJ
+`define TCM_SEL_SET(index, val) \
+begin \
+     if ((index) < 4*1024) begin \
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem[((index) - 0*1024)/8] &= (~`VAL_COV_SET(32'hffffffff, ((index) - 0*1024)));\
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem[((index) - 0*1024)/8] |= `VAL_COV_SET(val, ((index) - 0*1024)); \
+     end \
+     else if (((index) >= 4*1024) && ((index) < 8*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem[((index) - 4*1024)/8] &= (~`VAL_COV_SET(32'hffffffff, ((index) - 4*1024)));\
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem[((index) - 4*1024)/8] |= `VAL_COV_SET(val, ((index) - 4*1024)); \
+     end \
+     else if (((index) >= 8*1024) && ((index) < 12*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem[((index) - 8*1024)/8] &= (~`VAL_COV_SET(32'hffffffff, ((index) - 8*1024)));\
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem[((index) - 8*1024)/8] |= `VAL_COV_SET(val, ((index) - 8*1024)); \
+     end \
+     else if (((index) >= 12*1024) && ((index) < 13*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem[((index) - 12*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 12*1024)));\
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem[((index) - 12*1024)/4] |= `VAL_COV_SET128(val, ((index) - 12*1024));\
+     end \
+     else if (((index) >= 13*1024) && ((index) < 14*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem[((index) - 13*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 13*1024)));\
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem[((index) - 13*1024)/4] |= `VAL_COV_SET128(val, ((index) - 13*1024));\
+     end \
+     else if (((index) >= 14*1024) && ((index) < 15*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem[((index) - 14*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 14*1024)));\
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem[((index) - 14*1024)/4] |= `VAL_COV_SET128(val, ((index) - 14*1024));\
+     end \
+     else if (((index) >= 15*1024) && ((index) < 16*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem[((index) - 15*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 15*1024)));\
+         `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem[((index) - 15*1024)/4] |= `VAL_COV_SET128(val, ((index) - 15*1024));\
+     end \
+     else `uvm_fatal("tcm sel error", $sformatf("index_sel %d great than 16k", (index))) \
+end
+`else
+`define TCM_SEL_SET(index, val) \
+begin \
+     if ((index) < 4*1024) begin \
+          `DUT_PATH.CPU.l1c_top.hsram.u_hsram_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)]  = (val); \
+     end \
+     else if (((index) >= 4*1024) && ((index) < 8*1024)) begin \
+          `DUT_PATH.CPU.l1c_top.hsram.u_hsram_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 4*1024]  = (val); \
+     end \
+     else if (((index) >= 8*1024) && ((index) < 12*1024)) begin \
+          `DUT_PATH.CPU.l1c_top.hsram.u_hsram_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 8*1024]  = (val); \
+     end \
+     else if (((index) >= 12*1024) && ((index) < 13*1024)) begin \
+          `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 12*1024]  = (val); \
+     end \
+     else if (((index) >= 13*1024) && ((index) < 14*1024)) begin \
+          `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 13*1024]  = (val); \
+     end \
+     else if (((index) >= 14*1024) && ((index) < 15*1024)) begin \
+          `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 14*1024]  = (val); \
+     end \
+     else if (((index) >= 15*1024) && ((index) < 16*1024)) begin \
+          `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_3.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 15*1024]  = (val); \
+     end \
+     else `uvm_fatal("tcm sel error", $sformatf("index_sel %d great than 16k", (index))) \
+end
+`endif
+
+`ifndef FPGA_PROJ
+`define TCM_WAIT_VAL(index, val) \
+begin \
+     if ((index) < 4*1024) begin \
+         wait (`COV_VAL_WAIT_GET(((index) - 0*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem) == (val)) ;\
+     end \
+     else if (((index) >= 4*1024) && ((index) < 8*1024)) begin \
+         wait (`COV_VAL_WAIT_GET(((index) - 4*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem) == (val)) ;\
+     end \
+     else if (((index) >= 8*1024) && ((index) < 12*1024)) begin \
+         wait (`COV_VAL_WAIT_GET(((index) - 8*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem) == (val)) ;\
+     end \
+     else if (((index) >= 12*1024) && ((index) < 13*1024)) begin \
+         wait (`COV_VAL_WAIT_GET128(((index) - 12*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+     end \
+     else if (((index) >= 13*1024) && ((index) < 14*1024)) begin \
+         wait (`COV_VAL_WAIT_GET128(((index) - 13*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+     end \
+     else if (((index) >= 14*1024) && ((index) < 15*1024)) begin \
+         wait (`COV_VAL_WAIT_GET128(((index) - 14*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+     end \
+     else if (((index) >= 15*1024) && ((index) < 16*1024)) begin \
+         wait (`COV_VAL_WAIT_GET128(((index) - 15*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+     end \
+     else `uvm_fatal("tcm sel error", $sformatf("index_sel %d great than 16k", (index))) \
+end
+`else
+`define TCM_WAIT_VAL(index, val) \
+begin \
+     if ((index) < 4*1024) begin \
+         wait (`DUT_PATH.CPU.l1c_top.hsram.u_hsram_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)] == (val));\
+     end \
+     else if (((index) >= 4*1024) && ((index) < 8*1024)) begin \
+         wait (`DUT_PATH.CPU.l1c_top.hsram.u_hsram_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 4*1024] == (val));\
+     end \
+     else if (((index) >= 8*1024) && ((index) < 12*1024)) begin \
+         wait (`DUT_PATH.CPU.l1c_top.hsram.u_hsram_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 8*1024] == (val));\
+     end \
+     else if (((index) >= 12*1024) && ((index) < 13*1024)) begin \
+         wait (`DUT_PATH.CPU.l1c_top.hsram.u_cache4k_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 12*1024] == (val));\
+     end \
+     else if (((index) >= 13*1024) && ((index) < 14*1024)) begin \
+         wait (`DUT_PATH.CPU.l1c_top.hsram.u_cache4k_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 13*1024] == (val));\
+     end \
+     else if (((index) >= 14*1024) && ((index) < 15*1024)) begin \
+         wait (`DUT_PATH.CPU.l1c_top.hsram.u_cache4k_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 14*1024] == (val));\
+     end \
+     else if (((index) >= 15*1024) && ((index) < 16*1024)) begin \
+         wait (`DUT_PATH.CPU.l1c_top.hsram.u_cache4k_3.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 15*1024] == (val));\
+     end \
+     else `uvm_fatal("tcm sel error", $sformatf("index_sel %d great than 16k", (index))) \
+end
+`endif
+
+`ifndef FPGA_PROJ
+`define TCM_GET_VAL(index, val) \
+begin \
+     if ((index) < 4*1024) begin \
+         val = `COV_VAL_WAIT_GET(((index) - 0*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem) ;\
+     end \
+     else if (((index) >= 4*1024) && ((index) < 8*1024)) begin \
+         val = `COV_VAL_WAIT_GET(((index) - 4*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem) ;\
+     end \
+     else if (((index) >= 8*1024) && ((index) < 12*1024)) begin \
+         val = `COV_VAL_WAIT_GET(((index) - 8*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_mem_bist_con.hsram_mem_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem) ;\
+     end \
+     else if (((index) >= 12*1024) && ((index) < 13*1024)) begin \
+         val = `COV_VAL_WAIT_GET128(((index) - 12*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem) ;\
+     end \
+     else if (((index) >= 13*1024) && ((index) < 14*1024)) begin \
+         val = `COV_VAL_WAIT_GET128(((index) - 13*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem) ;\
+     end \
+     else if (((index) >= 14*1024) && ((index) < 15*1024)) begin \
+         val = `COV_VAL_WAIT_GET128(((index) - 14*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem) ;\
+     end \
+     else if (((index) >= 15*1024) && ((index) < 16*1024)) begin \
+         val = `COV_VAL_WAIT_GET128(((index) - 14*1024), `DUT_PATH.CPU.l1c_top.hsram.hsram_cache_bist_con.hsram_cache_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem) ;\
+     end \
+     else `uvm_fatal("tcm sel error", $sformatf("index_sel %d great than 16k", (index))) \
+end
+`else
+`define TCM_GET_VAL(index, val) \
+begin \
+     if ((index) < 4*1024) begin \
+         val = `DUT_PATH.CPU.l1c_top.hsram.u_hsram_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)];\
+     end \
+     else if (((index) >= 4*1024) && ((index) < 8*1024)) begin \
+         val = `DUT_PATH.CPU.l1c_top.hsram.u_hsram_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 4*1024];\
+     end \
+     else if (((index) >= 8*1024) && ((index) < 12*1024)) begin \
+         val = `DUT_PATH.CPU.l1c_top.hsram.u_hsram_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 8*1024];\
+     end \
+     else if (((index) >= 12*1024) && ((index) < 13*1024)) begin \
+         val = `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 12*1024];\
+     end \
+     else if (((index) >= 13*1024) && ((index) < 14*1024)) begin \
+         val = `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 13*1024];\
+     end \
+     else if (((index) >= 14*1024) && ((index) < 15*1024)) begin \
+         val = `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 14*1024];\
+     end \
+     else if (((index) >= 15*1024) && ((index) < 16*1024)) begin \
+         val = `DUT_PATH.CPU.l1c_top.hsram.u_cache4k_3.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 15*1024];\
+     end \
+     else `uvm_fatal("tcm sel error", $sformatf("index_sel %d great than 16k", (index))) \
+end
+`endif
+
+`ifndef FPGA_PROJ
+`define ROM_SEL_SET(index, val) \
+begin\
+     if ((index) < 32*1024) begin \
+          `DUT_PATH.CPU.l1c_top.irom.l1c_rom_bist_con.l1c_rom_collar_SPLL40_32768X32BM2A_0_instance_0.SPLL40_32768X32BM2A_0_instance_0.Memory[(index)] = (val);\
+     end \
+     else if (((index) >= 32*1024) && ((index) < 16*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.irom.l1c_rom_bist_con.l1c_rom_collar_SPLL40_16384X32BM2A_0_instance_0.SPLL40_16384X32BM2A_0_instance_0.Memory[(index) - 32*1024] = (val);\
+     end \
+     else `uvm_fatal("rom sel error", $sformatf("index_sel %d great than 48k", (index))) \
+end
+`else
+`define ROM_SEL_SET(index, val) \
+begin\
+     if ((index) < 32*1024) begin \
+          `DUT_PATH.CPU.l1c_top.irom.SPLB40_32768X32BM4A_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)] = (val);\
+     end \
+     else if (((index) >= 32*1024) && ((index) < 16*1024)) begin \
+         `DUT_PATH.CPU.l1c_top.irom.SPLB40_32768X32BM4A_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 32*1024] = (val);\
+     end \
+     else `uvm_fatal("rom sel error", $sformatf("index_sel %d great than 48k", (index))) \
+end
+`endif
+
+`ifndef FPGA_PROJ
+`define ROM_GET_VAL(index, val) \
+begin\
+     if ((index) < 32*1024) begin \
+        val = `DUT_PATH.CPU.l1c_top.irom.l1c_rom_bist_con.l1c_rom_collar_SPLL40_32768X32BM2A_0_instance_0.SPLL40_32768X32BM2A_0_instance_0.Memory[(index)];\
+     end \
+     else if (((index) >= 32*1024) && ((index) < 16*1024)) begin \
+        val = `DUT_PATH.CPU.l1c_top.irom.l1c_rom_bist_con.l1c_rom_collar_SPLL40_16384X32BM2A_0_instance_0.SPLL40_16384X32BM2A_0_instance_0.Memory[(index) - 32*1024];\
+     end \
+     else `uvm_fatal("rom sel error", $sformatf("index_sel %d great than 48k", (index))) \
+end
+`else
+`define ROM_GET_VAL(index, val) \
+begin\
+     if ((index) < 32*1024) begin \
+        val = `DUT_PATH.CPU.l1c_top.irom.SPLB40_32768X32BM4A_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)] ;\
+     end \
+     else if (((index) >= 32*1024) && ((index) < 16*1024)) begin \
+        val = `DUT_PATH.CPU.l1c_top.irom.SPLB40_32768X32BM4A_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 32*1024];\
+     end \
+     else `uvm_fatal("rom sel error", $sformatf("index_sel %d great than 48k", (index))) \
+end
+`endif
+
+`ifndef FPGA_PROJ
+`define ROM_WAIT_VAL(index, val) \
+begin\
+     if ((index) < 32*1024) begin \
+        wait( `DUT_PATH.CPU.l1c_top.irom.l1c_rom_bist_con.l1c_rom_collar_SPLL40_32768X32BM2A_0_instance_0.SPLL40_32768X32BM2A_0_instance_0.Memory[(index)] == (val));\
+     end \
+     else if (((index) >= 32*1024) && ((index) < 16*1024)) begin \
+        wait (`DUT_PATH.CPU.l1c_top.irom.l1c_rom_bist_con.l1c_rom_collar_SPLL40_16384X32BM2A_0_instance_0.SPLL40_16384X32BM2A_0_instance_0.Memory[(index) - 32*1024] == (val));\
+     end \
+     else `uvm_fatal("rom sel error", $sformatf("index_sel %d great than 48k", (index))) \
+end
+`else
+`define ROM_WAIT_VAL(index, val) \
+begin\
+     if ((index) < 32*1024) begin \
+        wait( `DUT_PATH.CPU.l1c_top.irom.SPLB40_32768X32BM4A_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)] == (val));\
+     end \
+     else if (((index) >= 32*1024) && ((index) < 16*1024)) begin \
+        wait (`DUT_PATH.CPU.l1c_top.irom.SPLB40_32768X32BM4A_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 32*1024] == (val));\
+     end \
+     else `uvm_fatal("rom sel error", $sformatf("index_sel %d great than 48k", (index))) \
+end
+`endif
+
+`ifndef FPGA_PROJ
+`define OCRAM_SEL_SET(index, val) \
+begin \
+    if ((index) < 1024*4) begin\
+        `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem[((index) - 0*1024)/8] &= (~`VAL_COV_SET(32'hffffffff, ((index) - 0*1024)));\
+        `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem[((index) - 0*1024)/8] |= `VAL_COV_SET(val, ((index) - 0*1024)); \
+    end \
+    else if (((index) >= 1024*4) && ((index) < 1024*8)) begin\
+        `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem[((index) - 4*1024)/8] &= (~`VAL_COV_SET(32'hffffffff, ((index) - 4*1024)));\
+        `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem[((index) - 4*1024)/8] |= `VAL_COV_SET(val, ((index) - 4*1024)); \
+    end \
+    else if (((index) >= 1024*8) && ((index) < 1024*12)) begin\
+        `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem[((index) - 8*1024)/8] &= (~`VAL_COV_SET(32'hffffffff, ((index) - 8*1024)));\
+        `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem[((index) - 8*1024)/8] |= `VAL_COV_SET(val, ((index) - 8*1024)); \
+    end \
+    else if (((index) >= 1024*12) && ((index) < 1024*13)) begin\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem[((index) - 12*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 12*1024)));\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem[((index) - 12*1024)/4] |= `VAL_COV_SET128(val, ((index) - 12*1024));\
+    end \
+    else if (((index) >= 1024*13) && ((index) < 1024*14)) begin\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem[((index) - 13*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 13*1024)));\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem[((index) - 13*1024)/4] |= `VAL_COV_SET128(val, ((index) - 13*1024));\
+    end \
+    else if (((index) >= 1024*14) && ((index) < 1024*15)) begin\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem[((index) - 14*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 14*1024)));\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem[((index) - 14*1024)/4] |= `VAL_COV_SET128(val, ((index) - 14*1024));\
+    end \
+    else if (((index) >= 1024*15) && ((index) < 1024*16)) begin\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem[((index) - 15*1024)/4] &= (~`VAL_COV_SET128(32'hffffffff, ((index) - 15*1024)));\
+        `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem[((index) - 15*1024)/4] |= `VAL_COV_SET128(val, ((index) - 15*1024));\
+    end \
+end
+`define OCRAM_GET_VAL(index, val) \
+begin \
+    if ((index) < 1024*4) begin\
+         val = `COV_VAL_WAIT_GET(((index) - 0*1024), `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem) ;\
+    end \
+    else if (((index) >= 1024*4) && ((index) < 1024*8)) begin\
+         val = `COV_VAL_WAIT_GET(((index) - 4*1024), `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem) ;\
+    end \
+    else if (((index) >= 1024*8) && ((index) < 1024*12)) begin\
+         val = `COV_VAL_WAIT_GET(((index) - 8*1024), `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem) ;\
+    end \
+    else if (((index) >= 1024*12) && ((index) < 1024*13)) begin\
+         val = `COV_VAL_WAIT_GET128(((index) - 12*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem) ;\
+    end \
+    else if (((index) >= 1024*13) && ((index) < 1024*14)) begin\
+         val = `COV_VAL_WAIT_GET128(((index) - 13*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem) ;\
+    end \
+    else if (((index) >= 1024*14) && ((index) < 1024*15)) begin\
+         val = `COV_VAL_WAIT_GET128(((index) - 14*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem) ;\
+    end \
+    else if (((index) >= 1024*15) && ((index) < 1024*16)) begin\
+         val = `COV_VAL_WAIT_GET128(((index) - 15*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem) ;\
+    end \
+end
+`define OCRAM_WAIT_VAL(index, val) \
+begin \
+    if ((index) < 1024*4) begin\
+          wait (`COV_VAL_WAIT_GET((index - 0*1024), `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_0.SPRAM4096X32_EHVT_instance_0.mem) == (val)) ;\
+    end \
+    else if (((index) >= 1024*4) && ((index) < 1024*8)) begin\
+          wait (`COV_VAL_WAIT_GET((index - 4*1024), `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_1.SPRAM4096X32_EHVT_instance_0.mem) == (val)) ;\
+    end \
+    else if (((index) >= 1024*8) && ((index) < 1024*12)) begin\
+          wait (`COV_VAL_WAIT_GET((index - 8*1024), `DUT_PATH.npram.ocram_ram_bist_con.ocram_collar_SPRAM4096X32_EHVT_instance_2.SPRAM4096X32_EHVT_instance_0.mem) == (val)) ;\
+    end \
+    else if (((index) >= 1024*12) && ((index) < 1024*13)) begin\
+          wait (`COV_VAL_WAIT_GET128((index - 12*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_0.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+    end \
+    else if (((index) >= 1024*13) && ((index) < 1024*14)) begin\
+          wait (`COV_VAL_WAIT_GET128((index - 13*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_1.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+    end \
+    else if (((index) >= 1024*14) && ((index) < 1024*15)) begin\
+          wait (`COV_VAL_WAIT_GET128((index - 14*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_2.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+    end \
+    else if (((index) >= 1024*15) && ((index) < 1024*16)) begin\
+          wait (`COV_VAL_WAIT_GET128((index - 15*1024), `DUT_PATH.npram.em_ram_bist_con.em_ram_collar_SPRF1024X32_EHVT_instance_3.SPRF1024X32_EHVT_instance_0.mem) == (val)) ;\
+    end \
+end
+`else
+`define OCRAM_SEL_SET(index, val) \
+begin \
+    if ((index) < 1024*4) begin\
+        `DUT_PATH.npram.u_ocram_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)] = (val); \
+    end \
+    else if (((index) >= 1024*4) && ((index) < 1024*8)) begin\
+       `DUT_PATH.npram.u_ocram_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 4*1024] = (val); \
+    end \
+    else if (((index) >= 1024*8) && ((index) < 1024*12)) begin\
+       `DUT_PATH.npram.u_ocram_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 8*1024] = (val); \
+    end \
+    else if (((index) >= 1024*12) && ((index) < 1024*13)) begin\
+       `DUT_PATH.npram.u_ocram_3.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 12*1024] = (val); \
+    end \
+    else if (((index) >= 1024*13) && ((index) < 1024*14)) begin\
+       `DUT_PATH.npram.u_ocram_4.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 13*1024] = (val); \
+    end \
+    else if (((index) >= 1024*14) && ((index) < 1024*15)) begin\
+       `DUT_PATH.npram.u_ocram_5.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 14*1024] = (val); \
+    end \
+    else if (((index) >= 1024*15) && ((index) < 1024*16)) begin\
+       `DUT_PATH.npram.u_ocram_6.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 15*1024] = (val); \
+    end \
+end
+`define OCRAM_GET_VAL(index, val) \
+begin \
+    if ((index) < 1024*4) begin\
+       val = `DUT_PATH.npram.u_ocram_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)]  ; \
+    end \
+    else if (((index) >= 1024*4) && ((index) < 1024*8)) begin\
+      val =  `DUT_PATH.npram.u_ocram_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 4*1024] ; \
+    end \
+    else if (((index) >= 1024*8) && ((index) < 1024*12)) begin\
+      val = `DUT_PATH.npram.u_ocram_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 8*1024]  ; \
+    end \
+    else if (((index) >= 1024*12) && ((index) < 1024*13)) begin\
+      val = `DUT_PATH.npram.u_ocram_3.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 12*1024]  ; \
+    end \
+    else if (((index) >= 1024*13) && ((index) < 1024*14)) begin\
+      val = `DUT_PATH.npram.u_ocram_4.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 13*1024]  ; \
+    end \
+    else if (((index) >= 1024*14) && ((index) < 1024*15)) begin\
+      val = `DUT_PATH.npram.u_ocram_5.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 14*1024]  ; \
+    end \
+    else if (((index) >= 1024*15) && ((index) < 1024*16)) begin\
+      val = `DUT_PATH.npram.u_ocram_6.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 15*1024]  ; \
+    end \
+end
+`define OCRAM_WAIT_VAL(index, val) \
+begin \
+    if ((index) < 1024*4) begin\
+        wait (`DUT_PATH.npram.u_ocram_0.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index)] == (val)); \
+    end \
+    else if (((index) >= 1024*4) && ((index) < 1024*8)) begin\
+       wait (`DUT_PATH.npram.u_ocram_1.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 4*1024] == (val)); \
+    end \
+    else if (((index) >= 1024*8) && ((index) < 1024*12)) begin\
+       wait (`DUT_PATH.npram.u_ocram_2.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 8*1024] == (val)); \
+    end \
+    else if (((index) >= 1024*12) && ((index) < 1024*13)) begin\
+       wait (`DUT_PATH.npram.u_ocram_3.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 12*1024] == (val)); \
+    end \
+    else if (((index) >= 1024*13) && ((index) < 1024*14)) begin\
+       wait (`DUT_PATH.npram.u_ocram_4.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 13*1024] == (val)); \
+    end \
+    else if (((index) >= 1024*14) && ((index) < 1024*15)) begin\
+       wait (`DUT_PATH.npram.u_ocram_5.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 14*1024] == (val)); \
+    end \
+    else if (((index) >= 1024*15) && ((index) < 1024*16)) begin\
+       wait (`DUT_PATH.npram.u_ocram_6.inst.native_mem_module.blk_mem_gen_v8_3_6_inst.memory[(index) - 15*1024] == (val)); \
+    end \
+end
+`endif
+
+
+
+`ifndef FPGA_PROJ
+  `define EFUSE_MEM_SEL(index)           `DUT_PATH.ef.EFUSE_0.fuse_array[(index)]
+`else
+  `define EFUSE_MEM_SEL(index)           `DUT_PATH.ef.ef_fpga_efuse_0.efuse_d[(index)]
+`endif
+
+`define FLASH_MEM_SEL_WINBOND(index)   `DUT_WRAPPER_PATH.SPI_NOR_WINBOND.memory[(index)]
+`define FLASH_WINBOND_PATH             `DUT_WRAPPER_PATH.SPI_NOR_WINBOND
+`define FLASH_MEM_SEL_MIXIC(index)     `DUT_WRAPPER_PATH.SPI_NOR_MIXIC.ARRAY[(index)]
+`define FLASH_MEM_SEL_BY25Q16BS(index) `DUT_WRAPPER_PATH.i_BY25Q16BS.ARRAY[(index)] 
+`define FLASH_MEM_SEL_MX25U1635F(index)    `DUT_WRAPPER_PATH.i_MX25U1635F.ARRAY[(index)]
+`define FLASH_MEM_SEL_XT25F16(index)       `DUT_WRAPPER_PATH.i_XT25F16.mem_access.content[(index)]
+`define FLASH_MEM_SEL_XT25Q08(index)       `DUT_WRAPPER_PATH.i_XT25Q08.mem_access.content[(index)]
+`define FLASH_MEM_SEL_W25Q16JV(index)      `DUT_WRAPPER_PATH.i_W25Q16JV.memory[(index)]
+`define FLASH_W25Q16JV_PATH                `DUT_WRAPPER_PATH.i_W25Q16JV
+`define FLASH_MEM_SEL_W25Q80DV(index)      `DUT_WRAPPER_PATH.i_W25Q80DV.memory[(index)]
+
+
+`define SOC_SV_C_SHARE_SEL_SET(offset, val)    `TCM_SEL_SET((9065  + (offset)), (val))
+`define SOC_SV_C_SHARE_WAIT_VAL(offset,val)    `TCM_WAIT_VAL((9065 + (offset)), (val))
+`define SOC_SV_C_SHARE_GET_VAL(offset, val)    `TCM_GET_VAL((9065  + (offset)), val)
+
+
+`endif
