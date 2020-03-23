@@ -1,0 +1,6 @@
+
+
+clean:
+	@rm *.sv -rf
+ral:
+	@GenRal.pl -excl uart -ral=ral_uart_soc707

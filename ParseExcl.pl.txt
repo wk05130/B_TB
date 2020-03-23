@@ -1,0 +1,259 @@
+#!/usr/bin/perl 
+#use lib '/home/ppzhang/perl_install/Spreadsheet_XML/lib/perl5';
+#use lib '/home/ppzhang/perl_install/Moose/lib/perl5/x86_64-linux-thread-multi';
+#use lib '/home/ppzhang/perl_install/Module_Runtime/lib/perl5';
+#use lib '/home/ppzhang/perl_install/Class_Load/lib/perl5';
+#use lib '/home/ppzhang/perl_install/Data_OptList/lib/perl5';
+#use lib '/home/ppzhang/perl_install/Params_Util/lib/perl5/x86_64-linux-thread-multi';
+#use lib '/home/ppzhang/perl_install/Sub_Install/lib/perl5';
+#use lib '/home/ppzhang/perl_install/Module_Implementation/lib/perl5';
+#use lib '/home/ppzhang/perl_install/Try_Tiny/lib/perl5';
+#use lib '/home/ppzhang/perl_install/Archive_Zip/lib/perl5';
+use lib '/home/ppzhang/perl_install/ParseExcel/lib/perl5';
+use lib '/home/ppzhang/perl_install/Storage_Lite/lib/perl5';
+use lib '/home/ppzhang/perl_install/Crypt_RC4/lib/perl5';
+use lib '/home/ppzhang/perl_install/Digest_MD5/lib/perl5/x86_64-linux-thread-multi';
+#use Spreadsheet::Reader::ExcelXML;
+use Spreadsheet::ParseExcel;
+
+############################################
+# #  this script is used to parse excl   # #
+# #  author : ppzhang                    # #
+# #  date   : 2018.09.06                 # #
+# #  version: 1.0                        # #
+# ##########################################
+#my $parser = Spreadsheet::Reader::ExcelXML->new();
+#my $workbook = $parser->Parse("$ip_excl.xlsx");
+my $parser = new Spreadsheet::ParseExcel;
+my $workbook = $parser->Parse("$ip_excl.xls");
+
+if(!defined $workbook)
+{
+   die $parser->error(),"\n",;
+}
+
+open my $excl_to_txt_tmp," > tmp.txt" or die "can't open file tmp.txt:$!";
+my $reg_model_worksheet;
+my @sheet_name;
+#only one work sheet
+foreach(@{$workbook->{Worksheet}}){
+      $reg_model_worksheet = $_;
+	  push @sheet_name,$reg_model_worksheet->get_name();
+      my($regmodel_row_min,$regmodel_row_max) = $reg_model_worksheet->RowRange();
+      my($regmodel_col_min,$regmodel_col_max) = $reg_model_worksheet->ColRange();
+	  foreach ($regmodel_row_min .. $regmodel_row_max){       # only one row process
+      my $row = $_;
+      #print $excl_to_txt "Ral   $ral_name ";
+      foreach ($regmodel_col_min .. 4){      # every column 
+         my $col  = $_;
+         my $cell = $reg_model_worksheet->Cell($row,$col);
+         my $cell_value = $cell->Value();
+         chomp($cell_value);
+         #if not last col
+         if($col ne 4){
+            $cell_row = $cell_row."  $cell_value";
+         }else{
+       	 $cell_row = $cell_row."  $cell_value\n"; #add \n
+         }
+         print $excl_to_txt_tmp $cell_row;
+
+         #clear $cell_row
+         $cell_row = "";
+         
+         }
+      }
+}
+print "@sheet_name\n";
+
+close $excl_to_txt_tmp;
+
+#base addr bus width and register width(bit)
+my $base_addr;
+our $bus_width;
+our $reg_width;
+
+#every row content
+my $cell_row;
+
+#read only count
+my $ro_count = 0;
+my $wo_count = 0;
+my $total_count = 0;
+
+
+#uvm_reg_count
+my $uvm_reg_count = 0;
+
+#rsvd count
+my $rsvd_count = 0;
+
+#uvm_reg add and uvm_reg name
+my $addr;
+my $uvm_reg_name;
+my $REG_RW;
+
+#uvm_reg_field info
+my @field_name;
+my @width;
+my @start_p;
+my @RW;
+my $field_name;
+my $width;
+my $start_p;
+my $RW;
+#begin access tmp file
+open my $excl_to_txt," > ral.txt" or die "can't open file ral.txt:$!";
+open my $excl_to_txt_tmp," < tmp.txt" or die "can't open file tmp.txt:$!";
+
+my $line;
+my $array_s;
+my $single_store;
+my $ip_name;
+my $ral_cnt=0;
+
+foreach(<$excl_to_txt_tmp>){
+	chomp($_);
+	$line = $_;
+	if($line =~/Base\s+Address\s+0x(\w+)/){
+       $base_addr = $1;
+	}
+	if($line =~/Bus\s+Width\s+([0-9]+)/){
+       $bus_width = $1;
+	   #convert into byte
+	   $bus_width = $bus_width/8;
+
+	}
+    if($line =~/Register\s+Width\s+([0-9]+)/){
+       $reg_width = $1;
+	   $ip_name = shift @sheet_name;
+	   if($ral_cnt == 0){
+	      print $excl_to_txt "Ral  $ral_name $bus_width 0 UVM_LITTLE_ENDIAN UVM_NO_COVERAGE 0\n";
+	   }
+	   $ral_cnt++;
+	   print $excl_to_txt "sub_reg_block  $ip_name  $bus_width 0 UVM_LITTLE_ENDIAN UVM_NO_COVERAGE 0   $base_addr XXXX\n";
+	}
+	if($line =~/addr=0x(\w+)\s+(\w+)/){ #addr and sub reg name
+	   $uvm_reg_count++;
+	   #process last uvm_reg info
+	   if($uvm_reg_count >= 2){
+		  if($ro_count == $total_count){
+		     $REG_RW = "RO";
+		  }elsif($wo_count == $total_count){
+		     $REG_RW = "WO";
+		  }else{
+		     $REG_RW = "RW";
+		  }
+		  if($total_count==1){
+		     $single_store = 1;
+		  }else{
+		     $single_store = 0;
+		  }
+		  #clear $ro_count for next use
+		  $ro_count = 0;
+	      $wo_count = 0;
+	      $total_count = 0;
+		  $rsvd_count  = 0;
+	      print $excl_to_txt "sub_reg $uvm_reg_name $reg_width UVM_NO_COVERAGE $REG_RW  $addr\n";
+		  $array_s = @field_name;
+		  foreach(1 .. $array_s){
+			 $field_name = shift @field_name;
+			 $start_p    = shift @start_p;
+			 $width      = shift @width;
+			 $RW         = shift @RW;
+			 print $excl_to_txt "sub_reg_field $field_name $width $start_p $RW 0 0 1 1 $single_store XXXX\n";
+		  }
+	   }
+	   $addr         = $1;
+	   $uvm_reg_name = $2;
+	}
+	if($line =~/\[([0-9]+):([0-9]+).*\s+(rsvd)\s+(\w+)/i){
+	   push @field_name, $4.$rsvd_count;
+	   push @start_p, $2;
+	   push @width, $1-$2+1;
+	   if($3 eq "r/w" || $3 eq "R/W"){
+		  push @RW,"RW";
+	   }elsif($3 eq "w" || $3 eq "W"){
+		  push @RW,"WO";
+		  $wo_count++;
+	   }else{
+	     push @RW,"RO";
+		  $ro_count++;
+       }
+	   $total_count++;
+	   $rsvd_count++;
+	   next;
+	}
+	if($line =~/\[([0-9]+)\].*\s+(rsvd)\s+(\w+)/i){
+	   push @field_name, $3.$rsvd_count;
+	   push @start_p, $1;
+	   push @width,1;
+	   if($2 eq "r/w" || $2 eq "R/W"){
+		  push @RW,"RW";
+	   }elsif($2 eq "w" || $2 eq "W"){
+		  push @RW,"WO";
+		  $wo_count++;
+	   }else{
+	      push @RW,"RO";
+		  $ro_count++;
+       }
+	   $total_count++;
+	   $rsvd_count++;
+	}
+	if($line =~/\[([0-9]+):([0-9]+).*\s+(w|r\/w|r)\s+(\w+)/i){
+	   push @field_name, $4;
+	   push @start_p, $2;
+	   push @width, $1-$2+1;
+	   if($3 eq "r/w" || $3 eq "R/W"){
+		  push @RW,"RW";
+	   }elsif($3 eq "w" || $3 eq "W"){
+		  push @RW,"WO";
+		  $wo_count++;
+	   }else{
+	     push @RW,"RO";
+		  $ro_count++;
+       }
+	   $total_count++;
+	   next;
+	}
+	if($line =~/\[([0-9]+)\].*\s+(r\/w|r|w)\s+(\w+)/i){
+	   push @field_name, $3;
+	   push @start_p, $1;
+	   push @width,1;
+	   if($2 eq "r/w" || $2 eq "R/W"){
+		  push @RW,"RW";
+	   }elsif($2 eq "w" || $2 eq "W"){
+		  push @RW,"WO";
+		  $wo_count++;
+	   }else{
+	      push @RW,"RO";
+		  $ro_count++;
+       }
+	   $total_count++;
+	}
+}
+#process last uvm_reg
+if($ro_count == $total_count){
+   $REG_RW = "RO";
+}elsif($wo_count == $total_count){
+   $REG_RW = "WO";
+}else{
+   $REG_RW = "RW";
+}
+if($total_count==1){
+   $single_store = 1;
+}else{
+   $single_store = 0;
+}
+
+print $excl_to_txt "sub_reg $uvm_reg_name $reg_width UVM_NO_COVERAGE $REG_RW  $addr\n";
+$array_s = @field_name;
+foreach(1 .. $array_s){
+   $field_name = shift @field_name;
+   $start_p    = shift @start_p;
+   $width      = shift @width;
+   $RW         = shift @RW;
+   print $excl_to_txt "sub_reg_field $field_name $start_p $width $RW 0 0 1 1 $single_store\n";
+}
+close $excl_to_txt;
+close $excl_to_txt_tmp;
+1
